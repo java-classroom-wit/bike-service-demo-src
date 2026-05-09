@@ -1,0 +1,60 @@
+@startuml sequence-update-status
+title Diagram sekwencji – Zmiana statusu zlecenia (PUT /api/repair-orders/{id}/status)
+
+skinparam backgroundColor #FAFAFA
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 8
+
+actor Klient as client
+participant "RepairOrderController" as ctrl #EEF2FF
+participant "RepairOrderService" as svc #ECFDF5
+participant "RepairOrderRepository" as repo #FEF9C3
+participant "RepairOrderFactory" as factory #ECFDF5
+database "Baza danych" as db
+
+client -> ctrl : PUT /api/repair-orders/{id}/status\nBody: "COMPLETED"
+activate ctrl
+
+note right of ctrl
+  StatusRequest parsuje String
+  na RepairOrderStatus (case-insensitive)
+end note
+
+ctrl -> svc : updateStatus(id, status)
+activate svc
+
+svc -> repo : findById(id)
+activate repo
+repo -> db : SELECT repair_order
+db --> repo : Optional<RepairOrderEntity>
+repo --> svc : Optional<RepairOrderEntity>
+deactivate repo
+
+alt zlecenie nie znalezione
+    svc --> ctrl : Optional.empty()
+    ctrl --> client : HTTP 404 Not Found
+end
+
+svc -> svc : order.setStatus(status)
+
+alt status == COMPLETED
+    svc -> svc : order.setCompletedAt(now())
+end
+
+note right of svc
+  JPA dirty checking –
+  UPDATE wykonany automatycznie
+end note
+
+svc -> factory : create(entity)
+activate factory
+factory --> svc : RepairOrder
+deactivate factory
+
+svc --> ctrl : Optional<RepairOrder>
+deactivate svc
+
+ctrl --> client : HTTP 200 OK\n{ id, status: "COMPLETED", completedAt: "...", ... }
+deactivate ctrl
+
+@enduml

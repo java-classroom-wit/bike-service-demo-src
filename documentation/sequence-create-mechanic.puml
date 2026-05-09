@@ -1,0 +1,43 @@
+@startuml sequence-create-mechanic
+title Diagram sekwencji – Tworzenie mechanika (POST /api/mechanics)
+
+skinparam backgroundColor #FAFAFA
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 8
+
+actor Klient as client
+participant "MechanicController" as ctrl #EEF2FF
+participant "MechanicService" as svc #ECFDF5
+participant "MechanicRepository" as repo #FEF9C3
+participant "MechanicFactory" as factory #ECFDF5
+database "Baza danych" as db
+
+client -> ctrl : POST /api/mechanics\n{ firstName, lastName, specialization, hiredAt, email }
+activate ctrl
+
+ctrl -> svc : save(request.toCommand())
+activate svc
+
+svc -> svc : new MechanicEntity()\n+ wypełnij pola z command
+
+svc -> repo : save(entity)
+activate repo
+repo -> db : INSERT INTO mechanic
+db --> repo : MechanicEntity (z ID)
+repo --> svc : MechanicEntity
+deactivate repo
+
+svc -> factory : create(entity)
+activate factory
+factory --> svc : Mechanic
+deactivate factory
+
+svc --> ctrl : Mechanic
+deactivate svc
+
+ctrl --> client : HTTP 201 Created\n{ id, firstName, lastName, ... }
+deactivate ctrl
+
+@enduml
+
+

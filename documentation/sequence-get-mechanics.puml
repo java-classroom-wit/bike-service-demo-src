@@ -1,0 +1,51 @@
+@startuml sequence-get-mechanics
+title Diagram sekwencji – Pobieranie listy mechaników (GET /api/mechanics)
+
+skinparam backgroundColor #FAFAFA
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 8
+
+actor Klient as client
+participant "MechanicController" as ctrl #EEF2FF
+participant "MechanicService" as svc #ECFDF5
+participant "MechanicRepository" as repo #FEF9C3
+participant "EhCache (L2)" as cache #FFF3E0
+participant "MechanicFactory" as factory #ECFDF5
+database "Baza danych" as db
+
+client -> ctrl : GET /api/mechanics
+activate ctrl
+
+ctrl -> svc : findAll()
+activate svc
+
+svc -> repo : findAllWithRepairOrders()
+activate repo
+
+repo -> cache : sprawdź cache
+
+alt Cache HIT
+    cache --> repo : List<MechanicEntity>
+else Cache MISS
+    repo -> db : SELECT mechanic + repairOrders\n(JOIN FETCH)
+    db --> repo : wyniki
+    repo -> cache : zapisz do cache
+end
+
+repo --> svc : List<MechanicEntity>
+deactivate repo
+
+loop dla każdej encji
+    svc -> factory : create(entity)
+    activate factory
+    factory --> svc : Mechanic
+    deactivate factory
+end
+
+svc --> ctrl : List<Mechanic>
+deactivate svc
+
+ctrl --> client : HTTP 200 OK\n[ { id, firstName, ... } ]
+deactivate ctrl
+
+@enduml

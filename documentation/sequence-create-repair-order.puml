@@ -1,0 +1,74 @@
+@startuml sequence-create-repair-order
+title Diagram sekwencji – Tworzenie zlecenia naprawy (POST /api/repair-orders)
+
+skinparam backgroundColor #FAFAFA
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 8
+
+actor Klient as client
+participant "RepairOrderController" as ctrl #EEF2FF
+participant "RepairOrderService" as svc #ECFDF5
+participant "BicycleRepository" as bikeRepo #FEF9C3
+participant "MechanicRepository" as mechRepo #FEF9C3
+participant "RepairOrderRepository" as orderRepo #FEF9C3
+participant "RepairOrderFactory" as factory #ECFDF5
+database "Baza danych" as db
+
+client -> ctrl : POST /api/repair-orders\n{ description, bicycleId, mechanicId, estimatedCost }
+activate ctrl
+
+note right of ctrl
+  Walidacja: description wymagany,
+  bicycleId wymagany
+end note
+
+ctrl -> svc : save(request.createRepairOrderCommand())
+activate svc
+
+svc -> bikeRepo : findById(bicycleId)
+activate bikeRepo
+bikeRepo -> db : SELECT bicycle
+db --> bikeRepo : Optional<BicycleEntity>
+bikeRepo --> svc : BicycleEntity
+deactivate bikeRepo
+
+alt Rower nie znaleziony
+    svc --> ctrl : 400 Bad Request
+    ctrl --> client : HTTP 400 Bad Request
+end
+
+alt mechanicId != null
+    svc -> mechRepo : findById(mechanicId)
+    activate mechRepo
+    mechRepo -> db : SELECT mechanic
+    db --> mechRepo : Optional<MechanicEntity>
+    mechRepo --> svc : MechanicEntity
+    deactivate mechRepo
+
+    alt Mechanik nie znaleziony
+        svc --> ctrl : 400 Bad Request
+        ctrl --> client : HTTP 400 Bad Request
+    end
+end
+
+svc -> svc : new RepairOrderEntity()\nstatus = NEW, receivedAt = now()
+
+svc -> orderRepo : save(entity)
+activate orderRepo
+orderRepo -> db : INSERT INTO repair_order
+db --> orderRepo : RepairOrderEntity (z ID)
+orderRepo --> svc : RepairOrderEntity
+deactivate orderRepo
+
+svc -> factory : create(entity)
+activate factory
+factory --> svc : RepairOrder
+deactivate factory
+
+svc --> ctrl : RepairOrder
+deactivate svc
+
+ctrl --> client : HTTP 201 Created\n{ id, description, status: "NEW", ... }
+deactivate ctrl
+
+@enduml

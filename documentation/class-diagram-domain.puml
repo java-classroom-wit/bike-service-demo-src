@@ -1,0 +1,136 @@
+@startuml class-diagram-domain
+title Diagram klas – modele domenowe (warstwa serwisów)
+
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam backgroundColor #FAFAFA
+skinparam class {
+    BackgroundColor #F0FDF4
+    BorderColor #22C55E
+    ArrowColor #22C55E
+}
+
+package "pl.javasolutions.apps.service" {
+
+    package "bicycle" {
+        class Bicycle <<record>> {
+            + id : Long
+            + brand : String
+            + model : String
+            + frameNumber : String
+            + ownerName : String
+            + ownerPhone : String
+        }
+    }
+
+    package "bicycle.part" {
+        class Part <<record>> {
+            + id : Long
+            + name : String
+            + manufacturer : String
+            + price : BigDecimal
+        }
+    }
+
+    package "repair.step" {
+        class RepairStep <<record>> {
+            + id : Long
+            + description : String
+            + stepOrder : Integer
+            + durationMinutes : Integer
+        }
+    }
+
+    package "mechanic" {
+        class Mechanic <<record>> {
+            + id : Long
+            + firstName : String
+            + lastName : String
+            + specialization : String
+            + hiredAt : LocalDate
+            + email : String
+            + repairOrderIds : List<Long>
+        }
+
+        class CreateMechanicCommand <<record>> {
+            + firstName : String
+            + lastName : String
+            + specialization : String
+            + hiredAt : LocalDate
+            + email : String
+        }
+
+        class MechanicFactory <<utility>> {
+            + {static} create(entity: MechanicEntity) : Mechanic
+        }
+
+        class MechanicService <<Service>> {
+            - mechanicRepository : MechanicRepository
+            --
+            + findAll() : List<Mechanic>
+            + findById(id: Long) : Optional<Mechanic>
+            + save(cmd: CreateMechanicCommand) : Mechanic
+        }
+    }
+
+    package "repair.order" {
+        class RepairOrder <<record>> {
+            + id : Long
+            + description : String
+            + status : String
+            + receivedAt : LocalDateTime
+            + completedAt : LocalDateTime
+            + estimatedCost : BigDecimal
+            + bicycle : Bicycle
+            + mechanicId : Long
+            + repairSteps : List<RepairStep>
+            + parts : List<Part>
+        }
+
+        class CreateRepairOrderCommand <<record>> {
+            + description : String
+            + bicycleId : Long
+            + mechanicId : Long
+            + estimatedCost : BigDecimal
+            + status : RepairOrderStatus
+        }
+
+        enum RepairOrderStatus {
+            NEW
+            IN_PROGRESS
+            COMPLETED
+            --
+            + {static} from(status: String, fallback: Supplier) : RepairOrderStatus
+        }
+
+        class RepairOrderFactory <<utility>> {
+            + {static} create(entity: RepairOrderEntity) : RepairOrder
+        }
+
+        class RepairOrderService <<Service>> {
+            - repairOrderRepository : RepairOrderRepository
+            - bicycleRepository : BicycleRepository
+            - mechanicRepository : MechanicRepository
+            --
+            + findAll() : List<RepairOrder>
+            + findById(id: Long) : Optional<RepairOrder>
+            + save(cmd: CreateRepairOrderCommand) : RepairOrder
+            + updateStatus(id: Long, status: RepairOrderStatus) : Optional<RepairOrder>
+        }
+    }
+}
+
+RepairOrder *-- Bicycle : bicycle
+RepairOrder *-- "0..*" RepairStep : repairSteps
+RepairOrder *-- "0..*" Part : parts
+RepairOrderService ..> RepairOrder
+RepairOrderService ..> CreateRepairOrderCommand
+RepairOrderService ..> RepairOrderFactory
+RepairOrderService ..> RepairOrderStatus
+MechanicService ..> Mechanic
+MechanicService ..> CreateMechanicCommand
+MechanicService ..> MechanicFactory
+
+@enduml
+
+

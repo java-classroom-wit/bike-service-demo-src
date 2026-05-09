@@ -1,0 +1,72 @@
+@startuml class-diagram-entities
+title Diagram klas – warstwa encji JPA (repozytorium)
+
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam backgroundColor #FAFAFA
+skinparam class {
+    BackgroundColor #EEF2FF
+    BorderColor #6366F1
+    ArrowColor #6366F1
+}
+
+package "pl.javasolutions.apps.repository.model" {
+
+    class BicycleEntity <<Entity>> {
+        - id : Long
+        - brand : String
+        - model : String
+        - frameNumber : String
+        - ownerName : String
+        - ownerPhone : String
+        - repairOrders : List<RepairOrderEntity>
+    }
+
+    class MechanicEntity <<Entity>> {
+        - id : Long
+        - firstName : String
+        - lastName : String
+        - specialization : String
+        - hiredAt : LocalDate
+        - email : String
+        - repairOrders : List<RepairOrderEntity>
+    }
+
+    class RepairOrderEntity <<Entity>> {
+        - id : Long
+        - description : String
+        - status : String
+        - receivedAt : LocalDateTime
+        - completedAt : LocalDateTime
+        - estimatedCost : BigDecimal
+        - bicycle : BicycleEntity
+        - mechanic : MechanicEntity
+        - repairSteps : List<RepairStepEntity>
+        - parts : List<PartEntity>
+    }
+
+    class RepairStepEntity <<Entity>> {
+        - id : Long
+        - description : String
+        - stepOrder : Integer
+        - durationMinutes : Integer
+        - repairOrder : RepairOrderEntity
+    }
+
+    class PartEntity <<Entity>> {
+        - id : Long
+        - name : String
+        - manufacturer : String
+        - price : BigDecimal
+        - repairOrders : List<RepairOrderEntity>
+    }
+}
+
+BicycleEntity "1" o-- "0..*" RepairOrderEntity : OneToMany
+MechanicEntity "1" o-- "0..*" RepairOrderEntity : OneToMany
+RepairOrderEntity "1" *-- "0..*" RepairStepEntity : OneToMany (cascade ALL)
+RepairOrderEntity "0..*" -- "0..*" PartEntity : ManyToMany\n(via repair_order_part)
+
+@enduml
+
+

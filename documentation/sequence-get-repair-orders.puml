@@ -1,0 +1,55 @@
+@startuml sequence-get-repair-orders
+title Diagram sekwencji – Pobieranie listy zleceń naprawy (GET /api/repair-orders)
+
+skinparam backgroundColor #FAFAFA
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 8
+
+actor Klient as client
+participant "RepairOrderController" as ctrl #EEF2FF
+participant "RepairOrderService" as svc #ECFDF5
+participant "RepairOrderRepository" as repo #FEF9C3
+participant "EhCache (L2)" as cache #FFF3E0
+participant "RepairOrderFactory" as factory #ECFDF5
+database "Baza danych" as db
+
+client -> ctrl : GET /api/repair-orders
+activate ctrl
+
+ctrl -> svc : findAll()
+activate svc
+
+svc -> repo : findAllWithBicycleAndMechanic()
+activate repo
+
+repo -> cache : sprawdź cache
+
+alt Cache HIT
+    cache --> repo : List<RepairOrderEntity>
+else Cache MISS
+    repo -> db : SELECT repair_order + bicycle + mechanic\n(JOIN FETCH)
+    db --> repo : wyniki
+    repo -> db : SELECT repair_steps (@BatchSize=20)
+    db --> repo : repair_steps
+    repo -> db : SELECT parts (@BatchSize=20)
+    db --> repo : parts
+    repo -> cache : zapisz do cache
+end
+
+repo --> svc : List<RepairOrderEntity>
+deactivate repo
+
+loop dla każdej encji
+    svc -> factory : create(entity)
+    activate factory
+    factory --> svc : RepairOrder
+    deactivate factory
+end
+
+svc --> ctrl : List<RepairOrder>
+deactivate svc
+
+ctrl --> client : HTTP 200 OK\n[ { id, description, bicycle: {...}, ... } ]
+deactivate ctrl
+
+@enduml

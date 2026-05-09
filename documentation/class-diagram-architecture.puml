@@ -1,0 +1,149 @@
+@startuml class-diagram-architecture
+title Diagram klas – architektura warstwowa aplikacji Bike Service
+
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam backgroundColor #FAFAFA
+skinparam packageStyle rectangle
+
+skinparam class {
+    BackgroundColor #EFF6FF
+    BorderColor #3B82F6
+    ArrowColor #3B82F6
+}
+
+package "Warstwa REST (Controller)" #FCE7F3 {
+
+    class MechanicController <<RestController>> {
+        - mechanicService : MechanicService
+        --
+        + getAll() : List<MechanicResponse>
+        + getById(id: Long) : MechanicResponse
+        + create(request: CreateMechanicRequest) : MechanicResponse
+    }
+
+    class MechanicResponse <<record>> {
+        + id : Long
+        + firstName : String
+        + lastName : String
+        + specialization : String
+        + hiredAt : LocalDate
+        + email : String
+        + repairOrderIds : List<Long>
+        --
+        + {static} from(mechanic: Mechanic) : MechanicResponse
+    }
+
+    class CreateMechanicRequest <<record>> {
+        + firstName : String
+        + lastName : String
+        + specialization : String
+        + hiredAt : LocalDate
+        + email : String
+        --
+        + toCommand() : CreateMechanicCommand
+    }
+
+    class RepairOrderController <<RestController>> {
+        - repairOrderService : RepairOrderService
+        --
+        + getAll() : List<RepairOrderResponse>
+        + getById(id: Long) : RepairOrderResponse
+        + create(request: CreateRepairOrderRequest) : RepairOrderResponse
+        + updateStatus(id: Long, newStatus: String) : RepairOrderResponse
+    }
+
+    class RepairOrderResponse <<record>> {
+        + id : Long
+        + description : String
+        + status : String
+        + receivedAt : LocalDateTime
+        + completedAt : LocalDateTime
+        + estimatedCost : BigDecimal
+        + bicycle : Bicycle
+        + mechanicId : Long
+        --
+        + {static} from(order: RepairOrder) : RepairOrderResponse
+    }
+
+    class CreateRepairOrderRequest <<record>> {
+        + description : String
+        + bicycleId : Long
+        + mechanicId : Long
+        + estimatedCost : BigDecimal
+        --
+        + createRepairOrderCommand() : CreateRepairOrderCommand
+    }
+
+    class StatusRequest <<record>> {
+        + status : RepairOrderStatus
+    }
+}
+
+package "Warstwa Serwisów (Service)" #ECFDF5 {
+
+    class MechanicService <<Service>> {
+        - mechanicRepository : MechanicRepository
+        --
+        + findAll() : List<Mechanic>
+        + findById(id: Long) : Optional<Mechanic>
+        + save(cmd: CreateMechanicCommand) : Mechanic
+    }
+
+    class RepairOrderService <<Service>> {
+        - repairOrderRepository : RepairOrderRepository
+        - bicycleRepository : BicycleRepository
+        - mechanicRepository : MechanicRepository
+        --
+        + findAll() : List<RepairOrder>
+        + findById(id: Long) : Optional<RepairOrder>
+        + save(cmd: CreateRepairOrderCommand) : RepairOrder
+        + updateStatus(id: Long, status: RepairOrderStatus) : Optional<RepairOrder>
+    }
+}
+
+package "Warstwa Repozytoriów (Repository)" #FEF9C3 {
+
+    interface BicycleRepository <<JpaRepository>>
+    interface MechanicRepository <<JpaRepository>> {
+        + findAllWithRepairOrders() : List<MechanicEntity>
+        + findByIdWithRepairOrders(id: Long) : Optional<MechanicEntity>
+    }
+    interface RepairOrderRepository <<JpaRepository>> {
+        + findAllWithBicycleAndMechanic() : List<RepairOrderEntity>
+        + findByIdWithBicycleAndMechanic(id: Long) : Optional<RepairOrderEntity>
+    }
+    interface PartRepository <<JpaRepository>>
+    interface RepairStepRepository <<JpaRepository>>
+}
+
+package "Warstwa Encji (Entity)" #FEE2E2 {
+    class BicycleEntity <<Entity>>
+    class MechanicEntity <<Entity>>
+    class RepairOrderEntity <<Entity>>
+    class PartEntity <<Entity>>
+    class RepairStepEntity <<Entity>>
+}
+
+MechanicController --> MechanicService
+RepairOrderController --> RepairOrderService
+MechanicController ..> CreateMechanicRequest
+MechanicController ..> MechanicResponse
+RepairOrderController ..> CreateRepairOrderRequest
+RepairOrderController ..> RepairOrderResponse
+RepairOrderController ..> StatusRequest
+
+MechanicService --> MechanicRepository
+RepairOrderService --> RepairOrderRepository
+RepairOrderService --> BicycleRepository
+RepairOrderService --> MechanicRepository
+
+BicycleRepository ..> BicycleEntity
+MechanicRepository ..> MechanicEntity
+RepairOrderRepository ..> RepairOrderEntity
+PartRepository ..> PartEntity
+RepairStepRepository ..> RepairStepEntity
+
+@enduml
+
+
