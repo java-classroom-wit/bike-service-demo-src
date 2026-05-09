@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="007-create-repair-order-part" author="student">
+        <createTable tableName="repair_order_part">
+            <column name="repair_order_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="part_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey
+            tableName="repair_order_part"
+            columnNames="repair_order_id, part_id"
+            constraintName="pk_repair_order_part"/>
+
+        <addForeignKeyConstraint
+            baseTableName="repair_order_part"
+            baseColumnNames="repair_order_id"
+            referencedTableName="repair_order"
+            referencedColumnNames="id"
+            constraintName="fk_rop_repair_order"/>
+
+        <addForeignKeyConstraint
+            baseTableName="repair_order_part"
+            baseColumnNames="part_id"
+            referencedTableName="part"
+            referencedColumnNames="id"
+            constraintName="fk_rop_part"/>
+    </changeSet>
+
+</databaseChangeLog>
+

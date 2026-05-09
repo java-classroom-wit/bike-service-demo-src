@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="010-insert-test-data" author="bike-service-lab" context="dev">
+
+        <!-- Mechanicy -->
+        <insert tableName="mechanic">
+            <column name="first_name" value="Marek"/>
+            <column name="last_name" value="Zielinski"/>
+            <column name="specialization" value="hamulce hydrauliczne"/>
+            <column name="hired_at" valueDate="2020-03-15"/>
+        </insert>
+        <insert tableName="mechanic">
+            <column name="first_name" value="Ewa"/>
+            <column name="last_name" value="Kowalczyk"/>
+            <column name="specialization" value="przerzutki i napęd"/>
+            <column name="hired_at" valueDate="2021-06-01"/>
+        </insert>
+        <insert tableName="mechanic">
+            <column name="first_name" value="Tomasz"/>
+            <column name="last_name" value="Wojcik"/>
+            <column name="specialization" value="kola i opony"/>
+            <column name="hired_at" valueDate="2019-11-20"/>
+        </insert>
+
+        <!-- Rowery -->
+        <insert tableName="bicycle">
+            <column name="brand" value="Trek"/>
+            <column name="model" value="Marlin 7"/>
+            <column name="frame_number" value="WTU-2024-001"/>
+            <column name="owner_name" value="Jan Kowalski"/>
+            <column name="owner_phone" value="600100200"/>
+        </insert>
+        <insert tableName="bicycle">
+            <column name="brand" value="Giant"/>
+            <column name="model" value="Talon 29"/>
+            <column name="frame_number" value="GNT-2023-042"/>
+            <column name="owner_name" value="Anna Nowak"/>
+            <column name="owner_phone" value="601200300"/>
+        </insert>
+        <insert tableName="bicycle">
+            <column name="brand" value="Kross"/>
+            <column name="model" value="Level 5.0"/>
+            <column name="frame_number" value="KRS-2022-118"/>
+            <column name="owner_name" value="Piotr Wisniewski"/>
+        </insert>
+
+        <!-- Zlecenia naprawy -->
+        <insert tableName="repair_order">
+            <column name="description" value="Wymiana klocków hamulcowych + regulacja"/>
+            <column name="status" value="IN_PROGRESS"/>
+            <column name="received_at" valueDate="2024-04-10 09:00:00"/>
+            <column name="bicycle_id" valueNumeric="1"/>
+            <column name="mechanic_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="repair_order">
+            <column name="description" value="Przeglad ogolny po sezonie"/>
+            <column name="status" value="NEW"/>
+            <column name="received_at" valueDate="2024-04-12 14:30:00"/>
+            <column name="bicycle_id" valueNumeric="2"/>
+        </insert>
+
+    </changeSet>
+
+</databaseChangeLog>
+

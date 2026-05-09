@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="013-update-mechanic-emails" author="student" context="dev">
+        <update tableName="mechanic">
+            <column name="email" value="marek.zielinski@bikeserwis.pl"/>
+            <where>first_name = 'Marek' AND last_name = 'Zielinski'</where>
+        </update>
+
+        <update tableName="mechanic">
+            <column name="email" value="ewa.kowalczyk@bikeserwis.pl"/>
+            <where>first_name = 'Ewa' AND last_name = 'Kowalczyk'</where>
+        </update>
+
+        <update tableName="mechanic">
+            <column name="email" value="tomasz.wojcik@bikeserwis.pl"/>
+            <where>first_name = 'Tomasz' AND last_name = 'Wojcik'</where>
+        </update>
+
+        <rollback>
+            <update tableName="mechanic">
+                <column name="email" valueComputed="NULL"/>
+                <where>first_name IN ('Marek', 'Ewa', 'Tomasz')</where>
+            </update>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
+

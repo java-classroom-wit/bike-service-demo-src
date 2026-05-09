@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.ehcache.org/v3"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.0.xsd">
+
+    <!--
+        Hibernate Second-Level Cache (L2) - konfiguracja Ehcache 3
+
+        Strategie odświeżania:
+        - READ_ONLY   → dane nigdy nie zmieniane po pierwszym zapisie (np. katalog części)
+        - READ_WRITE  → dane mogą być aktualizowane (zapytania naprawy, mechanicy)
+        - NONSTRICT_READ_WRITE → rzadkie aktualizacje, akceptowalna krótka niespójność
+    -->
+
+    <!-- Domyślna konfiguracja dla regionów niedobranych wprost -->
+    <cache-template name="default">
+        <expiry>
+            <ttl unit="minutes">10</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">200</heap>
+        </resources>
+    </cache-template>
+
+    <!-- ========== Encje ========== -->
+
+    <!-- MechanicEntity: READ_WRITE - mechanicy mogą byc aktualizowani -->
+    <cache alias="pl.javasolutions.apps.repository.model.MechanicEntity"
+           uses-template="default">
+        <expiry>
+            <ttl unit="minutes">30</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">50</heap>
+        </resources>
+    </cache>
+
+    <!-- BicycleEntity: READ_WRITE - rowery rzadko zmieniaja dane -->
+    <cache alias="pl.javasolutions.apps.repository.model.BicycleEntity"
+           uses-template="default">
+        <expiry>
+            <ttl unit="minutes">60</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">200</heap>
+        </resources>
+    </cache>
+
+    <!-- RepairOrderEntity: READ_WRITE - zlecenia zmieniają status -->
+    <cache alias="pl.javasolutions.apps.repository.model.RepairOrderEntity"
+           uses-template="default">
+        <expiry>
+            <ttl unit="minutes">5</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">500</heap>
+        </resources>
+    </cache>
+
+    <!-- PartEntity: NONSTRICT_READ_WRITE - czesc katalogowa, rzadko zmieniana -->
+    <cache alias="pl.javasolutions.apps.repository.model.PartEntity"
+           uses-template="default">
+        <expiry>
+            <ttl unit="hours">2</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">300</heap>
+        </resources>
+    </cache>
+
+    <!-- RepairStepEntity: READ_WRITE -->
+    <cache alias="pl.javasolutions.apps.repository.model.RepairStepEntity"
+           uses-template="default">
+        <expiry>
+            <ttl unit="minutes">10</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">1000</heap>
+        </resources>
+    </cache>
+
+    <!-- ========== Kolekcje (asocjacje) ========== -->
+
+    <!-- Zlecenia powiazane z mechanikiem -->
+    <cache alias="pl.javasolutions.apps.repository.model.MechanicEntity.repairOrders"
+           uses-template="default">
+        <expiry>
+            <ttl unit="minutes">5</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">50</heap>
+        </resources>
+    </cache>
+
+    <!-- Zlecenia powiazane z rowerem -->
+    <cache alias="pl.javasolutions.apps.repository.model.BicycleEntity.repairOrders"
+           uses-template="default">
+        <expiry>
+            <ttl unit="minutes">5</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">200</heap>
+        </resources>
+    </cache>
+
+    <!-- Kroki naprawy powiazane ze zleceniem -->
+    <cache alias="pl.javasolutions.apps.repository.model.RepairOrderEntity.repairSteps"
+           uses-template="default">
+        <expiry>
+            <ttl unit="minutes">5</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">500</heap>
+        </resources>
+    </cache>
+
+    <!-- Czesci powiazane ze zleceniem (ManyToMany) -->
+    <cache alias="pl.javasolutions.apps.repository.model.RepairOrderEntity.parts"
+           uses-template="default">
+        <expiry>
+            <ttl unit="minutes">5</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">500</heap>
+        </resources>
+    </cache>
+
+    <!-- ========== Query Cache ========== -->
+
+    <!-- Region dla wynikow zapytan JPQL z @QueryHint -->
+    <cache alias="org.hibernate.cache.internal.StandardQueryCache"
+           uses-template="default">
+        <expiry>
+            <ttl unit="minutes">5</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">100</heap>
+        </resources>
+    </cache>
+
+    <!-- Znaczniki czestotliwości aktualizacji tabel (wymagane dla query cache) -->
+    <cache alias="org.hibernate.cache.spi.UpdateTimestampsCache"
+           uses-template="default">
+        <expiry>
+            <tti unit="minutes">2</tti>
+        </expiry>
+        <resources>
+            <heap unit="entries">1000</heap>
+        </resources>
+    </cache>
+
+</config>
+

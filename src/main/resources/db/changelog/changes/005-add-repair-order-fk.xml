@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="005-add-repair-order-fk" author="student">
+        <addForeignKeyConstraint
+            baseTableName="repair_order"
+            baseColumnNames="bicycle_id"
+            referencedTableName="bicycle"
+            referencedColumnNames="id"
+            constraintName="fk_repair_order_bicycle"/>
+
+        <addForeignKeyConstraint
+            baseTableName="repair_order"
+            baseColumnNames="mechanic_id"
+            referencedTableName="mechanic"
+            referencedColumnNames="id"
+            constraintName="fk_repair_order_mechanic"/>
+    </changeSet>
+
+</databaseChangeLog>
+

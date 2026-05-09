@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <include file="db/changelog/changes/001-create-bicycle.xml"/>
+    <include file="db/changelog/changes/002-create-mechanic.xml"/>
+    <include file="db/changelog/changes/003-create-repair-order.xml"/>
+    <include file="db/changelog/changes/004-add-bicycle-constraints.xml"/>
+    <include file="db/changelog/changes/005-add-repair-order-fk.xml"/>
+    <include file="db/changelog/changes/006-create-part.xml"/>
+    <include file="db/changelog/changes/007-create-repair-order-part.xml"/>
+    <include file="db/changelog/changes/008-create-repair-step.xml"/>
+    <include file="db/changelog/changes/009-add-indexes.xml"/>
+    <include file="db/changelog/changes/010-insert-test-data.xml"/>
+    <include file="db/changelog/changes/010a-tag-before-evolution.xml"/>
+    <include file="db/changelog/changes/011-add-estimated-cost.xml"/>
+    <include file="db/changelog/changes/012-add-mechanic-email.xml"/>
+    <include file="db/changelog/changes/013-update-mechanic-emails.xml"/>
+
+</databaseChangeLog>
