@@ -20,4 +20,7 @@
     <include file="db/changelog/changes/012-add-mechanic-email.xml"/>
     <include file="db/changelog/changes/013-update-mechanic-emails.xml"/>
 
+    <!-- Zajęcia REST API -->
+    <include file="db/changelog/changes/014-add-bicycle-image-path.xml"/>
+
 </databaseChangeLog>

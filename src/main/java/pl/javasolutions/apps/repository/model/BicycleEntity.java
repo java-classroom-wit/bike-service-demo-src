@@ -31,6 +31,9 @@ public class BicycleEntity {
     @Column(name = "owner_phone", length = 20)
     private String ownerPhone;
 
+    @Column(name = "image_path", length = 500)
+    private String imagePath;
+
     @OneToMany(mappedBy = "bicycle", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "pl.javasolutions.apps.repository.model.BicycleEntity.repairOrders")
     private List<RepairOrderEntity> repairOrders = new ArrayList<>();
@@ -54,6 +57,9 @@ public class BicycleEntity {
 
     public String getOwnerPhone() { return ownerPhone; }
     public void setOwnerPhone(String ownerPhone) { this.ownerPhone = ownerPhone; }
+
+    public String getImagePath() { return imagePath; }
+    public void setImagePath(String imagePath) { this.imagePath = imagePath; }
 
     public List<RepairOrderEntity> getRepairOrders() { return repairOrders; }
     public void setRepairOrders(List<RepairOrderEntity> repairOrders) { this.repairOrders = repairOrders; }

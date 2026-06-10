@@ -125,6 +125,28 @@
         </resources>
     </cache>
 
+    <!-- ========== Spring @Cacheable – PartService ========== -->
+
+    <!-- Cache listy części (stronicowane wyniki) -->
+    <cache alias="parts" uses-template="default">
+        <expiry>
+            <ttl unit="minutes">10</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">500</heap>
+        </resources>
+    </cache>
+
+    <!-- Cache pojedynczej części (po ID) -->
+    <cache alias="part" uses-template="default">
+        <expiry>
+            <ttl unit="minutes">10</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">500</heap>
+        </resources>
+    </cache>
+
     <!-- ========== Query Cache ========== -->
 
     <!-- Region dla wynikow zapytan JPQL z @QueryHint -->
